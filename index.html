@@ -1,313 +1,520 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research Institute - Studies Database</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        .logo {
-            max-width: 300px;
-        }
-        .login-info {
-            float: right;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        .main-content {
-            padding: 20px;
-        }
-        h1 {
-            color: #003366;
-            margin-top: 10px;
-            margin-bottom: 20px;
-        }
-        .highlight-bar {
-            background-color: #b3d452;
-            height: 10px;
-            margin: 15px 0 30px 0;
-        }
-        .search-panel {
-            background-color: #14365d;
-            color: white;
-            padding: 10px;
-            font-weight: bold;
-        }
-        .search-form {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border: 1px solid #ddd;
-        }
-        .form-row {
-            display: flex;
-            margin-bottom: 15px;
-        }
-        .form-column {
-            flex: 1;
-            padding-right: 20px;
-        }
-        .form-label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-field {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #ccc;
-        }
-        select.form-field {
-            background-color: white;
-        }
-        .search-button {
-            background-color: #14365d;
-            color: white;
-            padding: 8px 20px;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .action-links {
-            text-align: right;
-            margin: 15px 0;
-        }
-        .action-links a {
-            margin-left: 15px;
-            color: #0066cc;
-            text-decoration: none;
-        }
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .results-table th {
-            background-color: #14365d;
-            color: white;
-            padding: 8px;
-            text-align: left;
-        }
-        .results-table td {
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }
-        .results-table tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .view-link {
-            color: #0066cc;
-            text-decoration: none;
-        }
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .checkbox-container input {
-            margin-right: 5px;
-        }
-        .bottom-links {
-            margin-top: 10px;
-        }
-        .bottom-links a {
-            margin-right: 15px;
-            color: #0066cc;
-            text-decoration: none;
-        }
-    </style>
+  <title>Snake Competition</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #121212;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    canvas {
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      border-radius: 8px;
+    }
+    .title {
+      position: absolute;
+      top: 10px;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      width: 100%;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+    .info {
+      position: absolute;
+      bottom: 10px;
+      color: #888;
+      font-size: 14px;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="login-info">
-            Logged in as Jason Smith | <a href="#">Log Out</a>
-        </div>
-        <img src="/api/placeholder/200/80" alt="Research Institute Logo" class="logo">
-        <div class="highlight-bar"></div>
-        <h1>Studies</h1>
-    </header>
+  <div class="title">5-Snake Competition</div>
+  <div class="info">Watch 5 AI snakes compete for food! Click to restart after game over.</div>
+  
+  <script>
+    // Constants
+    const GRID_SIZE = 20;
+    const GRID_WIDTH = 30;
+    const GRID_HEIGHT = 30;
+    const FRAME_RATE = 15;
+    const SNAKE_COLORS = [
+      [255, 50, 50],   // Red
+      [50, 255, 50],   // Green
+      [50, 50, 255],   // Blue
+      [255, 255, 50],  // Yellow
+      [255, 50, 255]   // Purple
+    ];
+    const MAX_FOOD = 3;
 
-    <div class="main-content">
-        <div class="search-panel">Search Studies</div>
+    // Game variables
+    let snakes = [];
+    let foods = [];
+    let gameOver = false;
+    let scores = [0, 0, 0, 0, 0];
+    let gameTime = 0;
+    let maxGameTime = 60 * FRAME_RATE; // 60 seconds
+
+    function setup() {
+      createCanvas(GRID_WIDTH * GRID_SIZE, GRID_HEIGHT * GRID_SIZE);
+      frameRate(FRAME_RATE);
+      
+      // Initialize snakes
+      for (let i = 0; i < 5; i++) {
+        // Position snakes in different corners and center
+        let startPos;
+        switch(i) {
+          case 0: startPos = createVector(5, 5); break; // Top left
+          case 1: startPos = createVector(GRID_WIDTH - 5, 5); break; // Top right
+          case 2: startPos = createVector(5, GRID_HEIGHT - 5); break; // Bottom left
+          case 3: startPos = createVector(GRID_WIDTH - 5, GRID_HEIGHT - 5); break; // Bottom right
+          case 4: startPos = createVector(GRID_WIDTH/2, GRID_HEIGHT/2); break; // Center
+        }
         
-        <div class="search-form">
-            <div class="form-row">
-                <div class="form-column">
-                    <label class="form-label">Funding Agency: (Funding Tab)</label>
-                    <input type="text" class="form-field">
-                    
-                    <label class="form-label">Institution where funding is held:</label>
-                    <input type="text" class="form-field">
-                    
-                    <label class="form-label">Sponsor/CRO Company: (Clinical Trial Tab)</label>
-                    <input type="text" class="form-field">
-                    
-                    <label class="form-label">Researcher Name:</label>
-                    <input type="text" class="form-field">
-                    
-                    <label class="form-label">Research Study Title:</label>
-                    <input type="text" class="form-field">
-                    
-                    <label class="form-label">VCHRI# (e.g. V08-1234):</label>
-                    <input type="text" class="form-field">
-                    
-                    <label class="form-label">REB# (e.g. H03-12345):</label>
-                    <input type="text" class="form-field">
-                    
-                    <label class="form-label">FAS#:</label>
-                    <input type="text" class="form-field">
-                    
-                    <label class="form-label">Study Status:</label>
-                    <select class="form-field">
-                        <option>All</option>
-                        <option>Open</option>
-                        <option>Closed</option>
-                        <option>Withdrawn/canceled</option>
-                        <option>Not Submitted</option>
-                    </select>
-                    
-                    <label class="form-label">Quality Review Status</label>
-                    <select class="form-field">
-                        <option>All</option>
-                        <option>Complete</option>
-                        <option>Pending</option>
-                        <option>Not Started</option>
-                    </select>
-                    
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="renewal-required">
-                        <label for="renewal-required">Renewal Required</label>
-                    </div>
-                </div>
-                
-                <div class="form-column">
-                    <label class="form-label">Regions</label>
-                    <select class="form-field">
-                        <option>All</option>
-                        <option>North</option>
-                        <option>South</option>
-                        <option>East</option>
-                        <option>West</option>
-                    </select>
-                    
-                    <label class="form-label">Sites</label>
-                    <select class="form-field">
-                        <option>All</option>
-                        <option>Main Campus</option>
-                        <option>Downtown</option>
-                        <option>Hospital</option>
-                    </select>
-                    
-                    <label class="form-label">Type Of Study:</label>
-                    <select class="form-field">
-                        <option>All</option>
-                        <option>Clinical Trial</option>
-                        <option>Observational</option>
-                        <option>Chart Review</option>
-                    </select>
-                    
-                    <label class="form-label">Phase of Study:</label>
-                    <select class="form-field">
-                        <option>All</option>
-                        <option>Phase I</option>
-                        <option>Phase II</option>
-                        <option>Phase III</option>
-                        <option>Phase IV</option>
-                    </select>
-                    
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="search-by-dates">
-                        <label for="search-by-dates">Search By These</label>
-                    </div>
-                    
-                    <select class="form-field">
-                        <option>Don't Search By Date</option>
-                        <option>Search By Approval Date</option>
-                        <option>Search By Expiry Date</option>
-                    </select>
-                    
-                    <label class="form-label">From</label>
-                    <input type="text" class="form-field" value="01/01/2010">
-                    
-                    <label class="form-label">To</label>
-                    <input type="text" class="form-field" value="01/01/2020">
-                    
-                    <label class="form-label">Is Audited:</label>
-                    <select class="form-field">
-                        <option>Any</option>
-                        <option>Yes</option>
-                        <option>No</option>
-                    </select>
-                </div>
-            </div>
+        snakes.push(new Snake(i, startPos, SNAKE_COLORS[i]));
+      }
+      
+      // Add initial food
+      for (let i = 0; i < MAX_FOOD; i++) {
+        addFood();
+      }
+    }
+
+    function draw() {
+      background(20);
+      
+      // Draw grid
+      stroke(40);
+      strokeWeight(1);
+      for (let i = 0; i < GRID_WIDTH; i++) {
+        line(i * GRID_SIZE, 0, i * GRID_SIZE, height);
+      }
+      for (let i = 0; i < GRID_HEIGHT; i++) {
+        line(0, i * GRID_SIZE, width, i * GRID_SIZE);
+      }
+      
+      // Update game time
+      if (!gameOver) {
+        gameTime++;
+        if (gameTime >= maxGameTime) {
+          gameOver = true;
+        }
+      }
+      
+      // Draw and update food
+      for (let food of foods) {
+        food.draw();
+      }
+      
+      // Draw and update snakes
+      if (!gameOver) {
+        for (let snake of snakes) {
+          if (snake.alive) {
+            snake.think();
+            snake.update();
+          }
+          snake.draw();
+        }
+      }
+      
+      // Add food if needed
+      while (foods.length < MAX_FOOD) {
+        addFood();
+      }
+      
+      // Draw UI
+      drawUI();
+      
+      // Check if all snakes are dead
+      if (!gameOver && snakes.every(s => !s.alive)) {
+        gameOver = true;
+      }
+    }
+
+    function drawUI() {
+      // Draw score and timer
+      fill(255);
+      noStroke();
+      textSize(16);
+      textAlign(LEFT, TOP);
+      
+      // Timer
+      let timeLeft = floor((maxGameTime - gameTime) / FRAME_RATE);
+      let timeStr = "Time: " + timeLeft + "s";
+      text(timeStr, 10, 10);
+      
+      // Scores
+      for (let i = 0; i < 5; i++) {
+        fill(SNAKE_COLORS[i]);
+        let snakeStatus = snakes[i].alive ? "🐍" : "💀";
+        text(`Snake ${i+1}: ${scores[i]} ${snakeStatus}`, 10, 40 + i * 25);
+      }
+      
+      // Game over message
+      if (gameOver) {
+        textAlign(CENTER, CENTER);
+        textSize(36);
+        fill(255);
+        text("GAME OVER", width/2, height/2 - 40);
+        
+        textSize(24);
+        let winner = scores.indexOf(Math.max(...scores));
+        fill(SNAKE_COLORS[winner]);
+        text(`Snake ${winner+1} wins with ${scores[winner]} points!`, width/2, height/2 + 10);
+        
+        textSize(16);
+        fill(200);
+        text("Click to restart", width/2, height/2 + 50);
+      }
+    }
+
+    function mousePressed() {
+      if (gameOver) {
+        // Reset game
+        snakes = [];
+        foods = [];
+        scores = [0, 0, 0, 0, 0];
+        gameTime = 0;
+        gameOver = false;
+        setup();
+      }
+    }
+
+    function addFood() {
+      let pos;
+      let overlapping;
+      
+      // Find a position that doesn't overlap with snakes or other food
+      do {
+        overlapping = false;
+        pos = createVector(
+          floor(random(1, GRID_WIDTH - 1)),
+          floor(random(1, GRID_HEIGHT - 1))
+        );
+        
+        // Check overlap with food
+        for (let food of foods) {
+          if (food.pos.x === pos.x && food.pos.y === pos.y) {
+            overlapping = true;
+            break;
+          }
+        }
+        
+        // Check overlap with snakes
+        if (!overlapping) {
+          for (let snake of snakes) {
+            for (let segment of snake.body) {
+              if (segment.x === pos.x && segment.y === pos.y) {
+                overlapping = true;
+                break;
+              }
+            }
+            if (overlapping) break;
+          }
+        }
+      } while (overlapping);
+      
+      foods.push(new Food(pos));
+    }
+
+    class Snake {
+      constructor(id, pos, color) {
+        this.id = id;
+        this.color = color;
+        this.body = [pos.copy()];
+        this.velocity = createVector(1, 0); // Start moving right
+        this.alive = true;
+        this.growCount = 2; // Start with length 3
+        this.lastDirection = 'right';
+        // Add slightly different personalities to each snake
+        this.personality = {
+          aggressiveness: random(0.2, 0.8),
+          carefulness: random(0.3, 0.9),
+          foodPriority: random(0.6, 1.0),
+          // The snake with id 0 is slightly smarter
+          intelligence: id === 0 ? random(0.7, 0.9) : random(0.5, 0.8)
+        };
+      }
+      
+      think() {
+        // Find nearest food
+        let nearestFood = null;
+        let minDist = Infinity;
+        
+        for (let food of foods) {
+          let dist = this.manhattanDistance(this.body[0], food.pos);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestFood = food;
+          }
+        }
+        
+        if (nearestFood) {
+          // Possible directions
+          const directions = [
+            { dx: 1, dy: 0, name: 'right' },
+            { dx: -1, dy: 0, name: 'left' },
+            { dx: 0, dy: 1, name: 'down' },
+            { dx: 0, dy: -1, name: 'up' }
+          ];
+          
+          // Filter out opposite direction to prevent immediate death
+          const validDirections = directions.filter(dir => {
+            if ((this.lastDirection === 'right' && dir.name === 'left') ||
+                (this.lastDirection === 'left' && dir.name === 'right') ||
+                (this.lastDirection === 'up' && dir.name === 'down') ||
+                (this.lastDirection === 'down' && dir.name === 'up')) {
+              return false;
+            }
+            return true;
+          });
+          
+          // Score each direction
+          const scoredDirections = validDirections.map(dir => {
+            const newHead = createVector(
+              this.body[0].x + dir.dx,
+              this.body[0].y + dir.dy
+            );
             
-            <button class="search-button">Search</button>
-        </div>
+            // Check if the move would kill us
+            if (this.wouldDie(newHead)) {
+              return { dir, score: -1000 };
+            }
+            
+            // Calculate distance to food in this direction
+            let foodScore = -this.manhattanDistance(newHead, nearestFood.pos) * this.personality.foodPriority;
+            
+            // Calculate safety score (avoid walls and self-collision)
+            let safetyScore = 0;
+            
+            // Check how much space is available in this direction
+            let spaceFactor = this.checkFreeSpace(newHead);
+            safetyScore += spaceFactor * 10 * this.personality.carefulness;
+            
+            // Prefer to move in the general direction of food
+            let directionScore = 0;
+            if ((nearestFood.pos.x > this.body[0].x && dir.name === 'right') ||
+                (nearestFood.pos.x < this.body[0].x && dir.name === 'left') ||
+                (nearestFood.pos.y > this.body[0].y && dir.name === 'down') ||
+                (nearestFood.pos.y < this.body[0].y && dir.name === 'up')) {
+              directionScore += 20 * this.personality.intelligence;
+            }
+            
+            // Calculate final score with some randomness
+            let finalScore = foodScore + safetyScore + directionScore + random(-10, 10);
+            
+            return { dir, score: finalScore };
+          });
+          
+          // Sort by score and filter out deadly moves
+          const safeMoves = scoredDirections.filter(item => item.score > -999);
+          
+          // Choose the best direction, or a random one if no safe moves
+          if (safeMoves.length > 0) {
+            safeMoves.sort((a, b) => b.score - a.score);
+            this.velocity.x = safeMoves[0].dir.dx;
+            this.velocity.y = safeMoves[0].dir.dy;
+            this.lastDirection = safeMoves[0].dir.name;
+          } else {
+            // No safe moves, just pick a valid one and hope for the best
+            const randomDir = validDirections[floor(random(validDirections.length))];
+            this.velocity.x = randomDir.dx;
+            this.velocity.y = randomDir.dy;
+            this.lastDirection = randomDir.name;
+          }
+        }
+      }
+      
+      checkFreeSpace(pos) {
+        // Simple check for immediate surroundings
+        let freeSpaces = 0;
+        const directions = [
+          { x: 1, y: 0 },
+          { x: -1, y: 0 },
+          { x: 0, y: 1 },
+          { x: 0, y: -1 }
+        ];
         
-        <div class="bottom-links">
-            <a href="#">Add New Study</a>
-            <a href="#">Return To Menu</a>
-        </div>
+        for (let dir of directions) {
+          const checkPos = createVector(pos.x + dir.x, pos.y + dir.y);
+          if (!this.wouldDie(checkPos)) {
+            freeSpaces++;
+          }
+        }
         
-        <div class="action-links">
-            <a href="#">Mass Creation of Renewal Reminders</a>
-            <a href="#">Export Results to XLS</a>
-            <a href="#">Consolidate Export to XLS</a>
-        </div>
+        return freeSpaces;
+      }
+      
+      manhattanDistance(pos1, pos2) {
+        return abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y);
+      }
+      
+      wouldDie(newHead) {
+        // Check wall collision
+        if (newHead.x < 0 || newHead.x >= GRID_WIDTH || 
+            newHead.y < 0 || newHead.y >= GRID_HEIGHT) {
+          return true;
+        }
         
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th>Researcher Name</th>
-                    <th>Title</th>
-                    <th>REB#</th>
-                    <th>FAS#</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Gerry Parker</td>
-                    <td>Elevating Leadership Performance</td>
-                    <td></td>
-                    <td></td>
-                    <td>Closed</td>
-                    <td><a href="#" class="view-link">view</a></td>
-                </tr>
-                <tr>
-                    <td>Leber</td>
-                    <td>test</td>
-                    <td></td>
-                    <td></td>
-                    <td>Not Submitted</td>
-                    <td><a href="#" class="view-link">view</a></td>
-                </tr>
-                <tr>
-                    <td>Tim Stockwell</td>
-                    <td>Vancouver Managed Alcohol Program Evaluation</td>
-                    <td>11-289 (UVIC)</td>
-                    <td></td>
-                    <td>Closed</td>
-                    <td><a href="#" class="view-link">view</a></td>
-                </tr>
-                <tr>
-                    <td>Nadine Nakamura</td>
-                    <td>The Asian Canadian Men's Health Study</td>
-                    <td>2010s0636</td>
-                    <td>SFU</td>
-                    <td>Withdrawn/canceled</td>
-                    <td><a href="#" class="view-link">view</a></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+        // Check self collision
+        for (let i = 0; i < this.body.length - 1; i++) {
+          if (this.body[i].x === newHead.x && this.body[i].y === newHead.y) {
+            return true;
+          }
+        }
+        
+        // Check other snake collision
+        for (let snake of snakes) {
+          if (snake !== this && snake.alive) {
+            for (let segment of snake.body) {
+              if (segment.x === newHead.x && segment.y === newHead.y) {
+                return true;
+              }
+            }
+          }
+        }
+        
+        return false;
+      }
+      
+      update() {
+        // Move head
+        const newHead = createVector(
+          this.body[0].x + this.velocity.x,
+          this.body[0].y + this.velocity.y
+        );
+        
+        // Check if we died
+        if (this.wouldDie(newHead)) {
+          this.alive = false;
+          return;
+        }
+        
+        // Add new head
+        this.body.unshift(newHead);
+        
+        // Check for food collision
+        let ateFood = false;
+        for (let i = 0; i < foods.length; i++) {
+          if (newHead.x === foods[i].pos.x && newHead.y === foods[i].pos.y) {
+            foods.splice(i, 1);
+            this.growCount += 3;
+            scores[this.id]++;
+            ateFood = true;
+            break;
+          }
+        }
+        
+        // Remove tail unless growing
+        if (this.growCount > 0) {
+          this.growCount--;
+        } else {
+          this.body.pop();
+        }
+      }
+      
+      draw() {
+        // Draw snake body
+        noStroke();
+        
+        for (let i = 0; i < this.body.length; i++) {
+          // Create gradient effect from head to tail
+          let segmentColor = [...this.color];
+          let alpha = this.alive ? 255 : 120; // Dim the snake if dead
+          
+          // Make the head brighter
+          if (i === 0) {
+            segmentColor = segmentColor.map(c => min(c + 50, 255));
+          } else {
+            // Create gradient effect
+            let gradientFactor = 1 - (i / this.body.length) * 0.5;
+            segmentColor = segmentColor.map(c => c * gradientFactor);
+          }
+          
+          fill(segmentColor[0], segmentColor[1], segmentColor[2], alpha);
+          
+          const x = this.body[i].x * GRID_SIZE;
+          const y = this.body[i].y * GRID_SIZE;
+          
+          // Draw rounded segments
+          if (i === 0) {
+            // Head is a circle
+            ellipse(x + GRID_SIZE/2, y + GRID_SIZE/2, GRID_SIZE * 0.9, GRID_SIZE * 0.9);
+            
+            // Draw eyes
+            fill(10);
+            let eyeOffsetX = 0;
+            let eyeOffsetY = 0;
+            
+            if (this.lastDirection === 'right') eyeOffsetX = 3;
+            else if (this.lastDirection === 'left') eyeOffsetX = -3;
+            else if (this.lastDirection === 'down') eyeOffsetY = 3;
+            else if (this.lastDirection === 'up') eyeOffsetY = -3;
+            
+            ellipse(x + GRID_SIZE/2 + eyeOffsetX + GRID_SIZE/5, y + GRID_SIZE/2 - GRID_SIZE/6, GRID_SIZE * 0.2, GRID_SIZE * 0.2);
+            ellipse(x + GRID_SIZE/2 + eyeOffsetX - GRID_SIZE/5, y + GRID_SIZE/2 - GRID_SIZE/6, GRID_SIZE * 0.2, GRID_SIZE * 0.2);
+          } else {
+            // Body segments are rounded rects
+            rect(x + GRID_SIZE * 0.1, y + GRID_SIZE * 0.1, GRID_SIZE * 0.8, GRID_SIZE * 0.8, GRID_SIZE * 0.3);
+          }
+        }
+      }
+    }
+
+    class Food {
+      constructor(pos) {
+        this.pos = pos;
+        this.color = [random(150, 255), random(150, 255), random(150, 255)];
+        this.pulseSize = random(0.6, 0.8);
+        this.pulseSpeed = random(0.05, 0.1);
+        this.pulseOffset = random(0, TWO_PI);
+      }
+      
+      draw() {
+        // Pulsating effect
+        let pulse = this.pulseSize + sin(frameCount * this.pulseSpeed + this.pulseOffset) * 0.1;
+        
+        // Glow effect
+        strokeWeight(3);
+        stroke(this.color[0], this.color[1], this.color[2], 100);
+        fill(this.color[0], this.color[1], this.color[2], 200);
+        
+        // Draw food
+        let x = this.pos.x * GRID_SIZE + GRID_SIZE/2;
+        let y = this.pos.y * GRID_SIZE + GRID_SIZE/2;
+        
+        // Star shape
+        push();
+        translate(x, y);
+        rotate(frameCount * 0.01);
+        
+        beginShape();
+        for (let i = 0; i < 5; i++) {
+          let angle1 = TWO_PI / 5 * i;
+          let x1 = cos(angle1) * GRID_SIZE/2 * pulse;
+          let y1 = sin(angle1) * GRID_SIZE/2 * pulse;
+          vertex(x1, y1);
+          
+          let angle2 = TWO_PI / 5 * (i + 0.5);
+          let x2 = cos(angle2) * GRID_SIZE/4 * pulse;
+          let y2 = sin(angle2) * GRID_SIZE/4 * pulse;
+          vertex(x2, y2);
+        }
+        endShape(CLOSE);
+        pop();
+      }
+    }
+  </script>
 </body>
 </html>
