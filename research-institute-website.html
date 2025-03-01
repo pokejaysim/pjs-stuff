@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Institute - Studies Database</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .logo {
+            max-width: 300px;
+        }
+        .login-info {
+            float: right;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        h1 {
+            color: #003366;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .highlight-bar {
+            background-color: #b3d452;
+            height: 10px;
+            margin: 15px 0 30px 0;
+        }
+        .search-panel {
+            background-color: #14365d;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+        }
+        .search-form {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+        .form-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .form-column {
+            flex: 1;
+            padding-right: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-field {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+        select.form-field {
+            background-color: white;
+        }
+        .search-button {
+            background-color: #14365d;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .action-links {
+            text-align: right;
+            margin: 15px 0;
+        }
+        .action-links a {
+            margin-left: 15px;
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .results-table th {
+            background-color: #14365d;
+            color: white;
+            padding: 8px;
+            text-align: left;
+        }
+        .results-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .results-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .view-link {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .checkbox-container input {
+            margin-right: 5px;
+        }
+        .bottom-links {
+            margin-top: 10px;
+        }
+        .bottom-links a {
+            margin-right: 15px;
+            color: #0066cc;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="login-info">
+            Logged in as Jason Smith | <a href="#">Log Out</a>
+        </div>
+        <img src="/api/placeholder/200/80" alt="Research Institute Logo" class="logo">
+        <div class="highlight-bar"></div>
+        <h1>Studies</h1>
+    </header>
+
+    <div class="main-content">
+        <div class="search-panel">Search Studies</div>
+        
+        <div class="search-form">
+            <div class="form-row">
+                <div class="form-column">
+                    <label class="form-label">Funding Agency: (Funding Tab)</label>
+                    <input type="text" class="form-field">
+                    
+                    <label class="form-label">Institution where funding is held:</label>
+                    <input type="text" class="form-field">
+                    
+                    <label class="form-label">Sponsor/CRO Company: (Clinical Trial Tab)</label>
+                    <input type="text" class="form-field">
+                    
+                    <label class="form-label">Researcher Name:</label>
+                    <input type="text" class="form-field">
+                    
+                    <label class="form-label">Research Study Title:</label>
+                    <input type="text" class="form-field">
+                    
+                    <label class="form-label">VCHRI# (e.g. V08-1234):</label>
+                    <input type="text" class="form-field">
+                    
+                    <label class="form-label">REB# (e.g. H03-12345):</label>
+                    <input type="text" class="form-field">
+                    
+                    <label class="form-label">FAS#:</label>
+                    <input type="text" class="form-field">
+                    
+                    <label class="form-label">Study Status:</label>
+                    <select class="form-field">
+                        <option>All</option>
+                        <option>Open</option>
+                        <option>Closed</option>
+                        <option>Withdrawn/canceled</option>
+                        <option>Not Submitted</option>
+                    </select>
+                    
+                    <label class="form-label">Quality Review Status</label>
+                    <select class="form-field">
+                        <option>All</option>
+                        <option>Complete</option>
+                        <option>Pending</option>
+                        <option>Not Started</option>
+                    </select>
+                    
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="renewal-required">
+                        <label for="renewal-required">Renewal Required</label>
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <label class="form-label">Regions</label>
+                    <select class="form-field">
+                        <option>All</option>
+                        <option>North</option>
+                        <option>South</option>
+                        <option>East</option>
+                        <option>West</option>
+                    </select>
+                    
+                    <label class="form-label">Sites</label>
+                    <select class="form-field">
+                        <option>All</option>
+                        <option>Main Campus</option>
+                        <option>Downtown</option>
+                        <option>Hospital</option>
+                    </select>
+                    
+                    <label class="form-label">Type Of Study:</label>
+                    <select class="form-field">
+                        <option>All</option>
+                        <option>Clinical Trial</option>
+                        <option>Observational</option>
+                        <option>Chart Review</option>
+                    </select>
+                    
+                    <label class="form-label">Phase of Study:</label>
+                    <select class="form-field">
+                        <option>All</option>
+                        <option>Phase I</option>
+                        <option>Phase II</option>
+                        <option>Phase III</option>
+                        <option>Phase IV</option>
+                    </select>
+                    
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="search-by-dates">
+                        <label for="search-by-dates">Search By These</label>
+                    </div>
+                    
+                    <select class="form-field">
+                        <option>Don't Search By Date</option>
+                        <option>Search By Approval Date</option>
+                        <option>Search By Expiry Date</option>
+                    </select>
+                    
+                    <label class="form-label">From</label>
+                    <input type="text" class="form-field" value="01/01/2010">
+                    
+                    <label class="form-label">To</label>
+                    <input type="text" class="form-field" value="01/01/2020">
+                    
+                    <label class="form-label">Is Audited:</label>
+                    <select class="form-field">
+                        <option>Any</option>
+                        <option>Yes</option>
+                        <option>No</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="search-button">Search</button>
+        </div>
+        
+        <div class="bottom-links">
+            <a href="#">Add New Study</a>
+            <a href="#">Return To Menu</a>
+        </div>
+        
+        <div class="action-links">
+            <a href="#">Mass Creation of Renewal Reminders</a>
+            <a href="#">Export Results to XLS</a>
+            <a href="#">Consolidate Export to XLS</a>
+        </div>
+        
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Researcher Name</th>
+                    <th>Title</th>
+                    <th>REB#</th>
+                    <th>FAS#</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Gerry Parker</td>
+                    <td>Elevating Leadership Performance</td>
+                    <td></td>
+                    <td></td>
+                    <td>Closed</td>
+                    <td><a href="#" class="view-link">view</a></td>
+                </tr>
+                <tr>
+                    <td>Leber</td>
+                    <td>test</td>
+                    <td></td>
+                    <td></td>
+                    <td>Not Submitted</td>
+                    <td><a href="#" class="view-link">view</a></td>
+                </tr>
+                <tr>
+                    <td>Tim Stockwell</td>
+                    <td>Vancouver Managed Alcohol Program Evaluation</td>
+                    <td>11-289 (UVIC)</td>
+                    <td></td>
+                    <td>Closed</td>
+                    <td><a href="#" class="view-link">view</a></td>
+                </tr>
+                <tr>
+                    <td>Nadine Nakamura</td>
+                    <td>The Asian Canadian Men's Health Study</td>
+                    <td>2010s0636</td>
+                    <td>SFU</td>
+                    <td>Withdrawn/canceled</td>
+                    <td><a href="#" class="view-link">view</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
