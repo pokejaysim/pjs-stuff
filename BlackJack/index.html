@@ -15,10 +15,10 @@
             --neon-red: #ff073a;
             --neon-yellow: #ffea00;
             --table-green: #0a5c36;
-            --card-width: 120px;
-            --card-height: 168px;
+            --card-width: 100px;
+            --card-height: 140px;
             --card-radius: 8px;
-            --chip-size: 60px;
+            --chip-size: 50px;
         }
 
         * {
@@ -41,8 +41,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            max-width: 1200px;
+            padding: 10px;
+            max-width: 800px;
             margin: 0 auto;
             width: 100%;
         }
@@ -54,7 +54,7 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 
                         0 0 30px rgba(0, 194, 255, 0.1),
                         inset 0 0 50px rgba(0, 0, 0, 0.3);
-            padding: 20px;
+            padding: 15px;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -82,13 +82,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
             position: relative;
         }
 
         .area-label {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+            font-size: 1rem;
+            margin-bottom: 5px;
             text-shadow: 0 0 5px var(--neon-blue);
             letter-spacing: 2px;
         }
@@ -97,16 +97,16 @@
             display: flex;
             justify-content: center;
             min-height: var(--card-height);
-            margin: 10px 0;
+            margin: 5px 0;
             position: relative;
         }
 
         .dealer-area .hand {
-            margin-bottom: 30px;
+            margin-bottom: 15px;
         }
 
         .player-area .hand {
-            margin-top: 30px;
+            margin-top: 15px;
         }
 
         .card {
@@ -207,22 +207,22 @@
         }
 
         .score-display {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--neon-yellow);
             text-shadow: 0 0 5px rgba(255, 234, 0, 0.5);
             background-color: rgba(0, 0, 0, 0.5);
-            padding: 5px 15px;
+            padding: 3px 12px;
             border-radius: 20px;
-            margin: 10px 0;
+            margin: 5px 0;
         }
 
         .controls {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 8px;
             flex-wrap: wrap;
-            margin: 20px 0;
+            margin: 15px 0;
         }
 
         .btn {
@@ -230,8 +230,8 @@
             color: var(--text-color);
             border: 2px solid;
             border-radius: 30px;
-            padding: 10px 25px;
-            font-size: 1rem;
+            padding: 8px 16px;
+            font-size: 0.9rem;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -341,14 +341,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 20px 0;
+            margin: 10px 0;
         }
 
         .chips-container {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 6px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
@@ -488,10 +488,11 @@
         .stats-container {
             display: flex;
             justify-content: space-between;
-            padding: 10px 20px;
+            padding: 8px 15px;
             background-color: rgba(0, 0, 0, 0.5);
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .stats-item {
@@ -554,28 +555,28 @@
 
         @media (max-width: 768px) {
             :root {
-                --card-width: 90px;
-                --card-height: 126px;
-                --chip-size: 50px;
+                --card-width: 80px;
+                --card-height: 112px;
+                --chip-size: 45px;
             }
 
             .game-container {
-                padding: 10px;
+                padding: 8px;
             }
 
             .controls {
-                gap: 10px;
+                gap: 8px;
             }
 
             .btn {
-                padding: 8px 16px;
-                font-size: 0.9rem;
+                padding: 7px 14px;
+                font-size: 0.85rem;
             }
 
             .stats-container {
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 15px;
+                gap: 12px;
             }
 
             .stats-item {
@@ -585,34 +586,48 @@
 
         @media (max-width: 480px) {
             :root {
-                --card-width: 70px;
-                --card-height: 98px;
-                --chip-size: 40px;
+                --card-width: 60px;
+                --card-height: 84px;
+                --chip-size: 36px;
             }
 
             .card-value {
-                font-size: 1.2rem;
+                font-size: 1rem;
             }
 
             .card-suit {
-                font-size: 1.5rem;
+                font-size: 1.2rem;
             }
 
             .card-center {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
 
             .btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
+                padding: 5px 10px;
+                font-size: 0.75rem;
             }
 
             .message-title {
-                font-size: 1.5rem;
+                font-size: 1.3rem;
             }
 
             .stats-item {
-                flex: 1 0 100%;
+                flex: 1 0 45%;
+                font-size: 0.9rem;
+            }
+            
+            .area-label {
+                font-size: 0.9rem;
+            }
+            
+            .score-display {
+                font-size: 1rem;
+                padding: 2px 10px;
+            }
+            
+            .bet-amount {
+                font-size: 1.2rem;
             }
         }
 

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plinko Casino Game</title>
+    <style>
+        /* CSS Variables for easy theme customization */
+        :root {
+            --bg-color: #121212;
+            --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            --primary-color: #8e2de2;
+            --secondary-color: #4a00e0;
+            --neon-color: #00f3ff;
+            --text-color: #ffffff;
+            --grid-color: rgba(255, 255, 255, 0.1);
+            --border-radius: 12px;
+            --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+            
+            /* Game Specific Variables */
+            --peg-color: rgba(255, 255, 255, 0.5);
+            --peg-glow: 0 0 10px rgba(142, 45, 226, 0.7);
+            --slot-gradient: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --slot-highlight: #f5f5f5;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Header and Game Title */
+        header {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--neon-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(142, 45, 226, 0.5);
+        }
+
+        /* Main Layout */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        /* Game Board Container */
+        .game-board-container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Game Board */
+        .game-board {
+            width: 100%;
+            aspect-ratio: 6/8;  /* More compact ratio */
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Pegs */
+        .peg {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--peg-color);
+            border-radius: 50%;
+            box-shadow: var(--peg-glow);
+            z-index: 1;
+            transition: background-color 0.3s ease;
+        }
+
+        .peg.hit {
+            background-color: var(--neon-color);
+            box-shadow: 0 0 15px var(--neon-color);
+        }
+
+        /* Ball */
+        .ball {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 30% 30%, var(--neon-color), var(--primary-color));
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.8);
+            z-index: 5;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Drop Position Selector */
+        .drop-selector {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 4;
+        }
+        
+        .drop-position {
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .drop-position:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .drop-position.selected {
+            background-color: var(--neon-color);
+            box-shadow: 0 0 10px var(--neon-color);
+        }
+        
+        /* Particles */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Bottom Slots */
+        .slot-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px 20px;
+            z-index: 2;
+        }
+
+        .slot {
+            flex: 1;
+            height: 60px;
+            margin: 0 5px;
+            background: var(--slot-gradient);
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1rem;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .slot.active {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px var(--neon-color);
+        }
+
+        /* Controls */
+        .controls {
+            width: 100%;
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .wager-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            flex: 1;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(142, 45, 226, 0.5);
+        }
+
+        .button {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-color);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Game Info Display */
+        .game-info {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .info-item {
+            flex: 1;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .win {
+            color: #4ade80;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        .lose {
+            color: #f87171;
+            text-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+        }
+
+        /* Scoreboard */
+        .scoreboard {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .scoreboard h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: var(--neon-color);
+            letter-spacing: 2px;
+        }
+
+        .scores-list {
+            list-style: none;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius);
+            border-left: 3px solid var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .score-item:hover {
+            transform: translateX(5px);
+            background-color: rgba(0, 0, 0, 0.3);
+            border-left-color: var(--neon-color);
+        }
+
+        .score-rank {
+            font-weight: bold;
+            color: var(--neon-color);
+            width: 30px;
+        }
+
+        .score-wager {
+            flex: 1;
+            text-align: center;
+        }
+
+        .score-multiplier {
+            margin: 0 10px;
+            color: var(--neon-color);
+        }
+
+        .score-value {
+            font-weight: bold;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .game-board-container, .scoreboard {
+                width: 100%;
+                max-width: 380px;
+            }
+            
+            .game-board {
+                aspect-ratio: 5/7;  /* Even more compact on mobile */
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .slot {
+                font-size: 0.8rem;
+                height: 50px;
+            }
+            
+            .controls {
+                margin-top: 15px;
+                padding: 15px;
+            }
+            
+            .button {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .info-item {
+                padding: 8px;
+            }
+            
+            .info-value {
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 380px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .slot {
+                margin: 0 2px;
+                font-size: 0.7rem;
+                height: 45px;
+            }
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Animation Keyframes */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .peg {
+            animation: pulse 2s infinite ease-in-out;
+            animation-delay: calc(var(--delay) * 0.5s);
+        }
+
+        .win-animation {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .drop-position.selected {
+            animation: pop 0.3s ease-out;
+        }
+        
+        .slot.active {
+            animation: pop 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Plinko Casino</h1>
+        <p>Drop the ball and try your luck!</p>
+    </header>
+
+    <div class="container">
+        <div class="game-board-container">
+            <div class="game-board" id="gameBoard">
+                <!-- Pegs will be dynamically created by JS -->
+                
+                <!-- Drop position selector -->
+                <div class="drop-selector" id="dropSelector">
+                    <!-- Drop positions will be dynamically created by JS -->
+                </div>
+                
+                <!-- Ball -->
+                <div class="ball" id="ball"></div>
+                
+                <!-- Slots will be dynamically created by JS -->
+                <div class="slot-container" id="slotContainer"></div>
+            </div>
+            
+            <div class="controls">
+                <div class="wager-controls">
+                    <input type="number" id="wagerInput" min="1" max="1000" value="10" placeholder="Enter your wager">
+                    <button class="button" id="dropButton">Drop Ball</button>
+                </div>
+                
+                <div class="game-info">
+                    <div class="info-item">
+                        <div class="info-label">Balance</div>
+                        <div class="info-value" id="balanceDisplay">1000</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Last Win</div>
+                        <div class="info-value" id="winDisplay">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scoreboard">
+            <h2>Top 10 Payouts</h2>
+            <ul class="scores-list" id="scoresList">
+                <!-- Scores will be dynamically created by JS -->
+                <li class="score-item">
+                    <span class="score-rank">-</span>
+                    <span class="score-wager">-</span>
+                    <span class="score-multiplier">x</span>
+                    <span class="score-value">-</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Created with ❤️ | Play responsibly</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game Configuration
+            const config = {
+                rows: 8,               // Number of peg rows (reduced)
+                pegsPerRow: 11,        // Maximum pegs per row (reduced)
+                dropPositions: 7,      // Number of possible drop positions (reduced)
+                slots: 7,              // Number of slots at the bottom (reduced)
+                initialBalance: 1000,  // Starting balance
+                physics: {
+                    gravity: 0.5,      // Gravity force (increased)
+                    friction: 0.98,    // Friction (slightly reduced for faster movement)
+                    restitution: 0.6,  // Bounciness (reduced for faster settling)
+                    pegRadius: 5,      // Radius of pegs in pixels
+                    ballRadius: 6,     // Radius of ball in pixels (smaller)
+                }
+            };
+
+            // Multipliers for each slot (from left to right)
+            const slotMultipliers = [0.2, 0.5, 1.5, 10, 1.5, 0.5, 0.2];
+
+            // Game State
+            const state = {
+                balance: config.initialBalance,
+                wager: 10,
+                isAnimating: false,
+                highScores: [],
+                selectedDropPosition: 3, // Default to middle
+                ball: {
+                    x: 0,
+                    y: 0,
+                    vx: 0,
+                    vy: 0,
+                    element: null
+                },
+                pegs: [],        // Will hold all peg positions and elements
+                slots: [],       // Will hold all slot positions and elements
+                dropPositions: [], // Will hold all drop positions and elements
+                activeSlot: -1,  // Currently active slot
+                particles: []    // Will hold particle effect elements
+            };
+
+            // DOM Elements
+            const gameBoard = document.getElementById('gameBoard');
+            const ball = document.getElementById('ball');
+            const slotContainer = document.getElementById('slotContainer');
+            const dropSelector = document.getElementById('dropSelector');
+            const wagerInput = document.getElementById('wagerInput');
+            const dropButton = document.getElementById('dropButton');
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            const winDisplay = document.getElementById('winDisplay');
+            const scoresList = document.getElementById('scoresList');
+
+            // Initialize the game
+            function initGame() {
+                // Set up the ball
+                state.ball.element = ball;
+                
+                // Create pegs
+                createPegs();
+                
+                // Create slots
+                createSlots();
+                
+                // Create drop position selectors
+                createDropPositions();
+                
+                // Initialize event listeners
+                initEventListeners();
+                
+                // Update the UI
+                updateUI();
+            }
+            
+            // Create drop position selectors
+            function createDropPositions() {
+                // Clear drop selector
+                dropSelector.innerHTML = '';
+                state.dropPositions = [];
+                
+                // Create drop positions
+                for (let i = 0; i < config.dropPositions; i++) {
+                    const position = document.createElement('div');
+                    position.className = 'drop-position';
+                    if (i === state.selectedDropPosition) {
+                        position.classList.add('selected');
+                    }
+                    
+                    dropSelector.appendChild(position);
+                    
+                    state.dropPositions.push({
+                        index: i,
+                        element: position
+                    });
+                    
+                    // Add click event
+                    position.addEventListener('click', () => {
+                        if (!state.isAnimating) {
+                            // Update selection
+                            state.dropPositions.forEach(pos => {
+                                pos.element.classList.remove('selected');
+                            });
+                            position.classList.add('selected');
+                            state.selectedDropPosition = i;
+                        }
+                    });
+                }
+            }
+
+            // Create pegs in a triangular pattern
+            function createPegs() {
+                // Clear any existing pegs
+                state.pegs = [];
+                
+                // Get board dimensions
+                const boardWidth = gameBoard.clientWidth;
+                const boardHeight = gameBoard.clientHeight;
+                
+                // Calculate spacing between pegs
+                const horizontalSpacing = boardWidth / (config.pegsPerRow + 1);
+                const verticalSpacing = (boardHeight * 0.7) / (config.rows + 1);
+                
+                // Starting from row 1 (not 0) to leave space at the top for the ball drop
+                for (let row = 1; row <= config.rows; row++) {
+                    // Calculate how many pegs in this row (staggered pattern)
+                    const pegsInThisRow = row % 2 === 0 ? config.pegsPerRow - 1 : config.pegsPerRow;
+                    
+                    // Calculate horizontal offset for this row
+                    const rowOffset = row % 2 === 0 ? horizontalSpacing / 2 : 0;
+                    
+                    for (let col = 1; col <= pegsInThisRow; col++) {
+                        // Calculate peg position
+                        const x = (col * horizontalSpacing) + rowOffset;
+                        const y = row * verticalSpacing;
+                        
+                        // Create peg element
+                        const peg = document.createElement('div');
+                        peg.className = 'peg';
+                        peg.style.left = `${x - config.physics.pegRadius}px`;
+                        peg.style.top = `${y - config.physics.pegRadius}px`;
+                        peg.style.setProperty('--delay', Math.random() * 2); // Random animation delay
+                        gameBoard.appendChild(peg);
+                        
+                        // Store peg data
+                        state.pegs.push({
+                            x,
+                            y,
+                            element: peg,
+                            radius: config.physics.pegRadius
+                        });
+                    }
+                }
+            }
+
+            // Create slots at the bottom
+            function createSlots() {
+                // Clear slot container
+                slotContainer.innerHTML = '';
+                state.slots = [];
+                
+                for (let i = 0; i < config.slots; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'slot';
+                    slot.textContent = `${slotMultipliers[i]}x`;
+                    slotContainer.appendChild(slot);
+                    
+                    state.slots.push({
+                        index: i,
+                        multiplier: slotMultipliers[i],
+                        element: slot
+                    });
+                }
+            }
+
+            // Initialize event listeners
+            function initEventListeners() {
+                // Drop button click
+                dropButton.addEventListener('click', dropBall);
+                
+                // Wager input
+                wagerInput.addEventListener('input', () => {
+                    const value = parseInt(wagerInput.value);
+                    if (!isNaN(value) && value > 0) {
+                        state.wager = value;
+                    }
+                });
+                
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    if (!state.isAnimating) {
+                        // Recreate the pegs and slots when window is resized
+                        gameBoard.querySelectorAll('.peg').forEach(peg => peg.remove());
+                        createPegs();
+                        createSlots();
+                    }
+                });
+            }
+
+            // Update the UI
+            function updateUI() {
+                balanceDisplay.textContent = state.balance;
+                wagerInput.max = state.balance;
+                
+                // Disable drop button if balance is too low or animation in progress
+                if (state.balance < state.wager || state.isAnimating) {
+                    dropButton.disabled = true;
+                } else {
+                    dropButton.disabled = false;
+                }
+            }
+
+            // Drop the ball
+            function dropBall() {
+                // Validate wager
+                if (state.wager > state.balance || state.wager <= 0) {
+                    return;
+                }
+                
+                // Deduct wager from balance
+                state.balance -= state.wager;
+                
+                // Set animation flag
+                state.isAnimating = true;
+                
+                // Reset any active slots
+                state.slots.forEach(slot => {
+                    slot.element.classList.remove('active');
+                });
+                
+                // Reset win display
+                winDisplay.textContent = '-';
+                winDisplay.classList.remove('win', 'lose');
+                
+                // Update UI
+                updateUI();
+                
+                // Get board dimensions
+                const boardWidth = gameBoard.clientWidth;
+                
+                // Use the selected drop position
+                const dropIndex = state.selectedDropPosition;
+                const dropX = boardWidth * ((dropIndex + 1) / (config.dropPositions + 1));
+                
+                // Reset ball physics
+                state.ball.x = dropX;
+                state.ball.y = config.physics.ballRadius;
+                state.ball.vx = 0;
+                state.ball.vy = 0;
+                
+                // Position and show the ball
+                state.ball.element.style.left = `${dropX}px`;
+                state.ball.element.style.top = `${config.physics.ballRadius}px`;
+                state.ball.element.style.opacity = '1';
+                
+                // Clear any hit states
+                state.pegs.forEach(peg => {
+                    peg.element.classList.remove('hit');
+                });
+                
+                // Clear any existing particles
+                clearParticles();
+                
+                // Start animation
+                requestAnimationFrame(animateBall);
+            }
+            
+            // Clear all particles
+            function clearParticles() {
+                state.particles.forEach(particle => {
+                    if (particle.element && particle.element.parentNode) {
+                        particle.element.parentNode.removeChild(particle.element);
+                    }
+                });
+                state.particles = [];
+            }
+
+            // Animate the ball falling
+            function animateBall(timestamp) {
+                if (!state.lastTimestamp) {
+                    state.lastTimestamp = timestamp;
+                }
+                
+                // Calculate time delta
+                const delta = timestamp - state.lastTimestamp;
+                state.lastTimestamp = timestamp;
+                
+                // Limit delta to prevent large jumps after tab switch
+                const limitedDelta = Math.min(delta, 30);
+                
+                // Update physics
+                updatePhysics(limitedDelta / 16); // Normalize by 16ms (approx. 60fps)
+                
+                // Check if ball has landed in a slot
+                const hasLanded = checkSlotLanding();
+                
+                if (hasLanded) {
+                    // Reset timestamp for next drop
+                    state.lastTimestamp = null;
+                    
+                    // Process the result after a short delay (show the landing animation)
+                    setTimeout(() => {
+                        processResult();
+                        
+                        // Hide the ball after showing the result
+                        setTimeout(() => {
+                            state.ball.element.style.opacity = '0';
+                            state.isAnimating = false;
+                            updateUI();
+                        }, 500);
+                    }, 300);
+                } else {
+                    // Continue animation
+                    requestAnimationFrame(animateBall);
+                }
+            }
+
+            // Update ball physics
+            function updatePhysics(deltaFactor) {
+                // Apply gravity
+                state.ball.vy += config.physics.gravity * deltaFactor;
+                
+                // Apply friction
+                state.ball.vx *= config.physics.friction;
+                state.ball.vy *= config.physics.friction;
+                
+                // Update position
+                state.ball.x += state.ball.vx * deltaFactor;
+                state.ball.y += state.ball.vy * deltaFactor;
+                
+                // Get board boundaries
+                const boardWidth = gameBoard.clientWidth;
+                const boardHeight = gameBoard.clientHeight;
+                
+                // Check for wall collisions
+                const ballRadius = config.physics.ballRadius;
+                
+                // Left wall
+                if (state.ball.x < ballRadius) {
+                    state.ball.x = ballRadius;
+                    state.ball.vx = -state.ball.vx * config.physics.restitution;
+                }
+                
+                // Right wall
+                if (state.ball.x > boardWidth - ballRadius) {
+                    state.ball.x = boardWidth - ballRadius;
+                    state.ball.vx = -state.ball.vx * config.physics.restitution;
+                }
+                
+                // Bottom boundary (slot area)
+                const slotY = boardHeight - slotContainer.clientHeight;
+                if (state.ball.y > slotY - ballRadius && state.ball.vy > 0) {
+                    // Let the ball enter the slot area freely
+                    // We'll handle slot landing separately
+                }
+                
+                // Check for peg collisions
+                checkPegCollisions();
+                
+                // Update ball position
+                state.ball.element.style.left = `${state.ball.x}px`;
+                state.ball.element.style.top = `${state.ball.y}px`;
+            }
+
+            // Check for collisions with pegs
+            function checkPegCollisions() {
+                const ballRadius = config.physics.ballRadius;
+                
+                for (const peg of state.pegs) {
+                    // Calculate distance between ball and peg centers
+                    const dx = state.ball.x - peg.x;
+                    const dy = state.ball.y - peg.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // If the distance is less than the sum of the radii, we have a collision
+                    const minDistance = ballRadius + peg.radius;
+                    
+                    if (distance < minDistance) {
+                        // Calculate collision normal
+                        const nx = dx / distance;
+                        const ny = dy / distance;
+                        
+                        // Move the ball out of the peg
+                        const penetrationDepth = minDistance - distance;
+                        state.ball.x += nx * penetrationDepth;
+                        state.ball.y += ny * penetrationDepth;
+                        
+                        // Calculate the dot product of velocity and normal
+                        const dotProduct = state.ball.vx * nx + state.ball.vy * ny;
+                        
+                        // Apply impulse along the normal
+                        state.ball.vx -= (1 + config.physics.restitution) * dotProduct * nx;
+                        state.ball.vy -= (1 + config.physics.restitution) * dotProduct * ny;
+                        
+                        // Add some randomness to make the game less predictable
+                        state.ball.vx += (Math.random() - 0.5) * 0.5;
+                        
+                        // Show peg hit effect
+                        peg.element.classList.add('hit');
+                        setTimeout(() => {
+                            peg.element.classList.remove('hit');
+                        }, 300);
+                        
+                        // Only handle one collision per frame to prevent instability
+                        break;
+                    }
+                }
+            }
+
+            // Check if the ball has landed in a slot
+            function checkSlotLanding() {
+                const boardHeight = gameBoard.clientHeight;
+                const slotHeight = slotContainer.clientHeight;
+                const slotTop = boardHeight - slotHeight;
+                
+                // Check if ball is in the slot area
+                if (state.ball.y > slotTop) {
+                    // Calculate which slot the ball is in
+                    const slotWidth = gameBoard.clientWidth / config.slots;
+                    const slotIndex = Math.floor(state.ball.x / slotWidth);
+                    
+                    // Clamp to valid range
+                    const validIndex = Math.max(0, Math.min(config.slots - 1, slotIndex));
+                    
+                    // If we've fully entered a slot and reached the bottom
+                    if (state.ball.y > boardHeight - 20) {
+                        // Highlight the active slot
+                        state.activeSlot = validIndex;
+                        state.slots[validIndex].element.classList.add('active');
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+
+            // Process the game result
+            function processResult() {
+                if (state.activeSlot >= 0 && state.activeSlot < state.slots.length) {
+                    const slot = state.slots[state.activeSlot];
+                    const multiplier = slot.multiplier;
+                    
+                    // Calculate winnings
+                    const winnings = Math.floor(state.wager * multiplier);
+                    
+                    // Update balance
+                    state.balance += winnings;
+                    
+                    // Update win display
+                    if (winnings > state.wager) {
+                        winDisplay.textContent = `+${winnings}`;
+                        winDisplay.classList.add('win');
+                        winDisplay.classList.remove('lose');
+                    } else {
+                        const loss = state.wager - winnings;
+                        winDisplay.textContent = `-${loss}`;
+                        winDisplay.classList.add('lose');
+                        winDisplay.classList.remove('win');
+                    }
+                    
+                    // Add win animation
+                    winDisplay.classList.add('win-animation');
+                    setTimeout(() => {
+                        winDisplay.classList.remove('win-animation');
+                    }, 500);
+                    
+                    // Create particle effect for the landing
+                    createParticleEffect(state.ball.x, state.ball.y, winnings);
+                    
+                    // Add to high scores if significant
+                    if (winnings >= state.wager) {
+                        addHighScore(state.wager, multiplier, winnings);
+                    }
+                    
+                    // Update UI
+                    updateUI();
+                }
+            }
+            
+            // Create particle effect
+            function createParticleEffect(x, y, winnings) {
+                // Determine number of particles based on win amount
+                const particleCount = winnings <= state.wager ? 15 : 
+                                     (winnings <= state.wager * 2 ? 25 : 40);
+                
+                // Determine particle color based on win amount
+                let particleColor;
+                if (winnings <= state.wager * 0.5) {
+                    particleColor = '#f87171'; // Red for losses
+                } else if (winnings <= state.wager) {
+                    particleColor = '#fbbf24'; // Yellow for small wins
+                } else if (winnings <= state.wager * 2) {
+                    particleColor = '#60a5fa'; // Blue for medium wins
+                } else {
+                    particleColor = '#4ade80'; // Green for big wins
+                }
+                
+                // Create particles
+                for (let i = 0; i < particleCount; i++) {
+                    // Create particle element
+                    const particleElement = document.createElement('div');
+                    particleElement.className = 'particle';
+                    particleElement.style.left = `${x}px`;
+                    particleElement.style.top = `${y}px`;
+                    particleElement.style.backgroundColor = particleColor;
+                    particleElement.style.boxShadow = `0 0 6px ${particleColor}`;
+                    gameBoard.appendChild(particleElement);
+                    
+                    // Create particle data
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 2 + Math.random() * 4;
+                    const particle = {
+                        element: particleElement,
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 2, // Initial upward velocity
+                        size: 3 + Math.random() * 5,
+                        gravity: 0.1,
+                        life: 1.0,
+                        decay: 0.01 + Math.random() * 0.03
+                    };
+                    
+                    // Set initial size
+                    particleElement.style.width = `${particle.size}px`;
+                    particleElement.style.height = `${particle.size}px`;
+                    
+                    // Add to particles array
+                    state.particles.push(particle);
+                }
+                
+                // Start updating particles
+                if (!state.isUpdatingParticles) {
+                    state.isUpdatingParticles = true;
+                    requestAnimationFrame(updateParticles);
+                }
+            }
+            
+            // Update particles animation
+            function updateParticles() {
+                let hasActiveParticles = false;
+                
+                state.particles.forEach((particle, index) => {
+                    // Update position
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    
+                    // Apply gravity
+                    particle.vy += particle.gravity;
+                    
+                    // Reduce life
+                    particle.life -= particle.decay;
+                    
+                    if (particle.life > 0) {
+                        // Update visual
+                        particle.element.style.left = `${particle.x}px`;
+                        particle.element.style.top = `${particle.y}px`;
+                        particle.element.style.opacity = particle.life;
+                        hasActiveParticles = true;
+                    } else {
+                        // Remove dead particles
+                        if (particle.element && particle.element.parentNode) {
+                            particle.element.parentNode.removeChild(particle.element);
+                        }
+                        state.particles[index] = null;
+                    }
+                });
+                
+                // Clean up null particles
+                state.particles = state.particles.filter(p => p !== null);
+                
+                // Continue animation if there are active particles
+                if (hasActiveParticles) {
+                    requestAnimationFrame(updateParticles);
+                } else {
+                    state.isUpdatingParticles = false;
+                }
+            }
+
+            // Add a score to the high scores list
+            function addHighScore(wager, multiplier, payout) {
+                // Add to high scores
+                state.highScores.push({
+                    wager,
+                    multiplier,
+                    payout,
+                    timestamp: Date.now()
+                });
+                
+                // Sort by payout (highest first)
+                state.highScores.sort((a, b) => b.payout - a.payout);
+                
+                // Keep only top 10
+                state.highScores = state.highScores.slice(0, 10);
+                
+                // Update scoreboard
+                updateScoreboard();
+            }
+
+            // Update the scoreboard display
+            function updateScoreboard() {
+                // Clear the list
+                scoresList.innerHTML = '';
+                
+                // Add high scores
+                if (state.highScores.length === 0) {
+                    const emptyItem = document.createElement('li');
+                    emptyItem.className = 'score-item';
+                    emptyItem.innerHTML = `
+                        <span class="score-rank">-</span>
+                        <span class="score-wager">No scores yet</span>
+                        <span class="score-multiplier">x</span>
+                        <span class="score-value">-</span>
+                    `;
+                    scoresList.appendChild(emptyItem);
+                } else {
+                    state.highScores.forEach((score, index) => {
+                        const item = document.createElement('li');
+                        item.className = 'score-item';
+                        item.innerHTML = `
+                            <span class="score-rank">#${index + 1}</span>
+                            <span class="score-wager">${score.wager}</span>
+                            <span class="score-multiplier">x${score.multiplier}</span>
+                            <span class="score-value">${score.payout}</span>
+                        `;
+                        scoresList.appendChild(item);
+                    });
+                }
+            }
+
+            // Load saved scores from localStorage
+            function loadSavedScores() {
+                const savedScores = localStorage.getItem('plinkoHighScores');
+                if (savedScores) {
+                    try {
+                        state.highScores = JSON.parse(savedScores);
+                        updateScoreboard();
+                    } catch (e) {
+                        console.error('Error loading saved scores:', e);
+                    }
+                }
+            }
+
+            // Save scores to localStorage
+            function saveScores() {
+                try {
+                    localStorage.setItem('plinkoHighScores', JSON.stringify(state.highScores));
+                } catch (e) {
+                    console.error('Error saving scores:', e);
+                }
+            }
+
+            // Set up autosave for scores
+            function setupAutoSave() {
+                setInterval(saveScores, 5000);
+            }
+
+            // Initialize the game when the page loads
+            initGame();
+            loadSavedScores();
+            setupAutoSave();
+        });
+    </script>
+</body>
+</html>
