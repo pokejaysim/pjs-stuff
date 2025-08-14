@@ -3,7 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PJS Games</title>
+  <title>PJS Games - Interactive Browser Games Collection</title>
+  <meta name="description" content="Play exciting browser games including Snake Competition, BlackJack, Plinko, and Minesweeper. Free online games with modern graphics and responsive design.">
+  <meta name="keywords" content="browser games, online games, snake game, blackjack, plinko, minesweeper, javascript games, free games">
+  <meta name="author" content="PJS">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://games.jasonlabs.ca/">
+  <meta property="og:title" content="PJS Games - Interactive Browser Games">
+  <meta property="og:description" content="Play exciting browser games including Snake Competition, BlackJack, Plinko, and Minesweeper.">
+  <meta property="og:image" content="https://games.jasonlabs.ca/images/games-preview.jpg">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://games.jasonlabs.ca/">
+  <meta property="twitter:title" content="PJS Games - Interactive Browser Games">
+  <meta property="twitter:description" content="Play exciting browser games including Snake Competition, BlackJack, Plinko, and Minesweeper.">
+  <meta property="twitter:image" content="https://games.jasonlabs.ca/images/games-preview.jpg">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4eff4e">
+  
+  <!-- Preconnect to external domains -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <!-- Preload critical CSS -->
+  <link rel="preload" href="assets/css/common.css" as="style">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/common.css">
   <style>
     body {
       margin: 0;
@@ -152,7 +186,7 @@
         <div class="game-info">
           <h2 class="game-title">Snake Competition</h2>
           <p class="game-description">Watch 5 AI-controlled snakes compete against each other to gather food and become the longest snake!</p>
-          <a href="SnakeGame/index.html" class="play-button">Play Now</a>
+          <a href="SnakeGame/index_new.html" class="play-button">Play Now</a>
         </div>
       </div>
       
@@ -210,5 +244,67 @@
   <footer>
     <p>Created with ❤️ by PJS | © 2025</p>
   </footer>
+  
+  <!-- Scripts -->
+  <script src="assets/js/common.js"></script>
+  <script>
+    // Add performance monitoring for main page
+    if (typeof GameUtils !== 'undefined') {
+      const performanceMonitor = GameUtils.createPerformanceMonitor();
+      
+      // Lazy load game previews for better performance
+      const gameCards = document.querySelectorAll('.game-card');
+      const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target.querySelector('img');
+            if (img && img.dataset.src) {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+              imageObserver.unobserve(entry.target);
+            }
+          }
+        });
+      });
+      
+      gameCards.forEach(card => {
+        imageObserver.observe(card);
+      });
+      
+      // Add smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+    }
+    
+    // Show loading state for game links
+    document.querySelectorAll('.play-button').forEach(button => {
+      button.addEventListener('click', function() {
+        this.textContent = 'Loading...';
+        this.style.pointerEvents = 'none';
+      });
+    });
+    
+    // Register service worker for offline functionality
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

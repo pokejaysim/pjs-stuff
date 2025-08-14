@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Competition - PJS Games</title>
+  <meta name="description" content="Watch 5 AI-controlled snakes compete for food in this exciting Snake Competition game!">
+  
+  <!-- Preload critical CSS -->
+  <link rel="preload" href="../assets/css/common.css" as="style">
+  <link rel="preload" href="style.css" as="style">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/common.css">
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Preload p5.js -->
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js" as="script">
+</head>
+<body>
+  <!-- Loading screen -->
+  <div class="loading-overlay" id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading Snake Competition...</div>
+  </div>
+  
+  <!-- Game wrapper -->
+  <div class="game-wrapper">
+    <div class="game-title">5-Snake Competition</div>
+    <div class="game-info">Watch 5 AI snakes compete for food! Use controls or keyboard shortcuts.</div>
+    <!-- Canvas and UI will be inserted here by JavaScript -->
+  </div>
+  
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+  <script src="../assets/js/common.js"></script>
+  <script>
+    // Show loading screen while scripts load
+    window.addEventListener('load', () => {
+      // Hide loading screen after a short delay to ensure everything is ready
+      setTimeout(() => {
+        document.getElementById('loadingScreen').style.display = 'none';
+      }, 1000);
+    });
+    
+    // Game instructions for mobile users
+    if (GameUtils && GameUtils.isMobile()) {
+      document.addEventListener('DOMContentLoaded', () => {
+        const info = document.querySelector('.game-info');
+        if (info) {
+          info.textContent = 'Watch 5 AI snakes compete for food! Tap to pause/restart.';
+        }
+      });
+    }
+  </script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "name": "PJS Games",
+  "short_name": "PJS Games",
+  "description": "Interactive browser games collection featuring Snake, BlackJack, Plinko, and Minesweeper",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#4eff4e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "en",
+  "scope": "/",
+  "screenshots": [
+    {
+      "src": "images/snake-preview.jpg",
+      "sizes": "400x200",
+      "type": "image/jpeg",
+      "label": "Snake Competition Game"
+    },
+    {
+      "src": "images/blackjack-preview.jpg",
+      "sizes": "400x200", 
+      "type": "image/jpeg",
+      "label": "BlackJack Game"
+    }
+  ]
+}
